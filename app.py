@@ -12,5 +12,6 @@ st.write(
     "- **Central Narrative**: We begin by taking into account daily weather patterns over time.\n"
     "- **Exploration**: For a closer reader-driven exploration of the data, we provide a few interactive designs.\n"
     "- **Methodology**: We lay down some key details about our data and limitations to our analysis.\n"
+    "- **Choropleths**: This is an example code to demonstrate how to integrate altair generated choropleths on Streamlit."
 )
 st.info("Dataset: `vega_datasets.data.seattle_weather()`")

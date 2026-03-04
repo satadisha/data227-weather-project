@@ -1,5 +1,7 @@
 import altair as alt
 import pandas as pd
+from datetime import date
+from typing import Dict, Any
 
 def base_theme():
     return {
@@ -107,3 +109,45 @@ def chart_dashboard(df: pd.DataFrame) -> alt.Chart:
     )
 
     return alt.vconcat(line, hist).resolve_scale(color="independent")
+
+def choropleth_design(
+    zip_df: pd.DataFrame,
+    seattle_zip_geojson,
+    zip_prop: str,
+    metric: str,
+    picked_date: date
+) -> alt.Chart:
+    """
+    Making an interactive choropleth with Altair and exporting it to Streamlit.
+    """
+    geo = alt.Data(
+        values=seattle_zip_geojson,
+        format=alt.DataFormat(type="json", property="features")
+    )
+
+    # Join zip_df onto the GeoJSON features using transform_lookup
+    choropleth = (
+        alt.Chart(geo)
+        .mark_geoshape(stroke="white", strokeWidth=0.6)
+        .encode(
+            color=alt.Color(
+                "metric_value:Q",
+                title=f"{metric} ({picked_date.date()})",
+                scale=alt.Scale(zero=False),
+            ),
+            tooltip=[
+                alt.Tooltip(f"properties.{zip_prop}:N", title="ZIP"),
+                alt.Tooltip("metric_value:Q", title=metric, format=".2f"),
+                alt.Tooltip("note:N", title="Note"),
+            ],
+        )
+        .transform_lookup(
+            lookup=f"properties.{zip_prop}",
+            from_=alt.LookupData(zip_df, key="zip", fields=["metric_value", "note"]),
+        )
+        .properties(width=800, height=650)
+        .project(type="mercator")
+    )
+    return choropleth
+
+
